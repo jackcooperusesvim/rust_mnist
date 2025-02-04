@@ -26,7 +26,7 @@ impl<const DIM: usize> SingleDimLayer<DIM, DIM> for ReLu<DIM> {
         for i in 0..DIM {
             inp[i] = {
                 if inp[i] < 0.0 {
-                    out_gradient[i]
+                    out_grad[i]
                 } else {
                     0.0
                 }
@@ -41,13 +41,16 @@ impl<const DIM: usize> SingleDimLayer<DIM, DIM> for ReLu<DIM> {
             _ => Err("ReLu does not accept a Gradient".to_string()),
         }
     }
+    fn blank_gradient(&mut self) -> Gradient<DIM, DIM> {
+        Gradient::Nil
+    }
 }
 
 pub struct SoftMax<const DIM: usize> {}
 
 impl<const DIM: usize> SingleDimLayer<DIM, DIM> for SoftMax<DIM> {
     fn new() -> Self {
-        SoftMax<DIM> {}
+        SoftMax::<DIM> {}
     }
 
     fn evaluate(&self, inp: [f64; DIM]) -> [f64; DIM] {
@@ -82,5 +85,8 @@ impl<const DIM: usize> SingleDimLayer<DIM, DIM> for SoftMax<DIM> {
             Gradient::Nil => Ok(()),
             _ => Err("SoftMax does not accept a Gradient".to_string()),
         }
+    }
+    fn blank_gradient(&mut self) -> Gradient<DIM, DIM> {
+        Gradient::Nil
     }
 }

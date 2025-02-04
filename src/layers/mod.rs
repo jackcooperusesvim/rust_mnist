@@ -6,13 +6,14 @@ trait SingleDimLayer<const IN: usize, const OUT: usize> {
     fn internal_gradient(&self, inp: [f64; IN], out_grad: &[f64; OUT]) -> Gradient<IN, OUT>;
     fn backprop(&self, inp: [f64; IN], out_grad: &[f64; OUT]) -> [f64; IN];
     fn apply_gradient(&mut self, grad: Gradient<IN, OUT>) -> Result<(), String>;
+    fn blank_gradient(&mut self) -> Gradient<IN, OUT>;
 }
-trait SingleDimLayerExtra {}
-impl<T> SingleDimLayerExtra for T where T: SingleDimLayer {}
+//trait SingleDimLayerExtra {}
+//impl<T> SingleDimLayerExtra for T where T: SingleDimLayer {}
 
 enum Gradient<const X: usize, const Y: usize> {
     SimpleActivation([f64; X]),
-    LayerConnection([[f64; Y]; X]),
+    LayerConnection([[f64; X]; Y]),
     Nil,
 }
 
@@ -21,39 +22,52 @@ struct SimpleActivationLayer<const X: usize> {
 }
 
 pub struct LayerConnection<const IN: usize, const OUT: usize> {
-    weights: [[f64; OUT]; IN],
+    weights: [[f64; IN]; OUT],
 }
-impl<const IN: usize, const OUT: usize> LayerConnection<IN, OUT> for Net<IN, OUT> {
+
+impl<const IN: usize, const OUT: usize> SingleDimLayer<IN, OUT> for LayerConnection<IN, OUT> {
     fn new() -> Self {
-        Net {
-            weights: [[0.0; OUT]; IN],
+        LayerConnection {
+            weights: [[0.0; IN]; OUT],
         }
     }
 
     fn evaluate(&self, inp: [f64; IN]) -> [f64; OUT] {
-        let mut out: [f64; OUT] = [0.0];
-
-        self.iter().map(|out_weights| {
-            for i in 0..OUT {
-                out[i] += inp[i] * out_weights[i]
-            }
-        });
-
-        out
+        self.weights
+            .iter()
+            .map(|row| row.iter().zip(inp.iter()).map(|(a, b)| a * b).sum())
+            .collect::<Vec<f64>>()
+            .try_into()
+            .unwrap()
     }
 
     fn internal_gradient(&self, inp: [f64; IN], out_gradient: &[f64; OUT]) -> Gradient<IN, OUT> {
-        out_gradient
-
-
-        Gradient::LayerConnection(())
+        Gradient::LayerConnection(out_gradient.map(|row_grad| inp.map(|inp| inp * row_grad)))
     }
 
-    fn backprop(&self, inp: [f64; IN], out_gradient: &[f64; OUT]) -> [f64; IN] {
-        todo!()
+    fn backprop(&self, _inp: [f64; IN], out_gradient: &[f64; OUT]) -> [f64; IN] {
+        let mut out: [f64; IN] = [0.0; IN];
+
+        for col in 0..IN {
+            out[col] = 0.0;
+            for row in 0..OUT {
+                out[col] += self.weights[col][row]
+            }
+        }
+
+        // Multiply Gradients
+        out.iter()
+            .zip(out_gradient.iter())
+            .map(|(a, b)| a * b)
+            .collect::<Vec<f64>>()
+            .try_into()
+            .unwrap()
     }
 
     fn apply_gradient(&mut self, grad: Gradient<IN, OUT>) -> Result<(), String> {
         todo!()
+    }
+    fn blank_gradient(&mut self) -> Gradient<IN, OUT> {
+        Gradient::LayerConnection([[0.0; IN]; OUT])
     }
 }
