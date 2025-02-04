@@ -18,11 +18,11 @@ impl<const DIM: usize> SingleDimLayer<DIM, DIM> for ReLu<DIM> {
         inp
     }
 
-    fn internal_gradient(&self, _inp: [f64; DIM], _out: [f64; DIM]) -> Gradient<DIM, DIM> {
+    fn internal_gradient(&self, _inp: [f64; DIM], _out_grad: &[f64; DIM]) -> Gradient<DIM, DIM> {
         Gradient::Nil
     }
 
-    fn backprop(&self, mut inp: [f64; DIM], out_gradient: [f64; DIM]) -> [f64; DIM] {
+    fn backprop(&self, mut inp: [f64; DIM], out_grad: &[f64; DIM]) -> [f64; DIM] {
         for i in 0..DIM {
             inp[i] = {
                 if inp[i] < 0.0 {
@@ -47,7 +47,7 @@ pub struct SoftMax<const DIM: usize> {}
 
 impl<const DIM: usize> SingleDimLayer<DIM, DIM> for SoftMax<DIM> {
     fn new() -> Self {
-        SoftMax {}
+        SoftMax<DIM> {}
     }
 
     fn evaluate(&self, inp: [f64; DIM]) -> [f64; DIM] {
@@ -56,7 +56,7 @@ impl<const DIM: usize> SingleDimLayer<DIM, DIM> for SoftMax<DIM> {
         inp.map(|i| i.exp() / sum)
     }
 
-    fn backprop(&self, mut inp: [f64; DIM], out_grad: [f64; DIM]) -> [f64; DIM] {
+    fn backprop(&self, mut inp: [f64; DIM], out_grad: &[f64; DIM]) -> [f64; DIM] {
         inp = inp.map(|i| i.exp());
         let sum: f64 = inp.iter().sum();
 
@@ -73,7 +73,7 @@ impl<const DIM: usize> SingleDimLayer<DIM, DIM> for SoftMax<DIM> {
             .unwrap()
     }
 
-    fn internal_gradient(&self, _inp: [f64; DIM], _out_grad: [f64; DIM]) -> Gradient<DIM, DIM> {
+    fn internal_gradient(&self, _inp: [f64; DIM], _out_grad: &[f64; DIM]) -> Gradient<DIM, DIM> {
         Gradient::Nil
     }
 
