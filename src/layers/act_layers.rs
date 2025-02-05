@@ -1,4 +1,4 @@
-use super::{Gradient, SingleDimLayer};
+use super::types::*;
 
 pub struct ReLu<const DIM: usize> {}
 impl<const DIM: usize> SingleDimLayer<DIM, DIM> for ReLu<DIM> {
@@ -19,7 +19,7 @@ impl<const DIM: usize> SingleDimLayer<DIM, DIM> for ReLu<DIM> {
     }
 
     fn internal_gradient(&self, _inp: [f64; DIM], _out_grad: &[f64; DIM]) -> Gradient<DIM, DIM> {
-        Gradient::Nil
+        None
     }
 
     fn backprop(&self, mut inp: [f64; DIM], out_grad: &[f64; DIM]) -> [f64; DIM] {
@@ -37,12 +37,12 @@ impl<const DIM: usize> SingleDimLayer<DIM, DIM> for ReLu<DIM> {
 
     fn apply_gradient(&mut self, grad: Gradient<DIM, DIM>) -> Result<(), String> {
         match grad {
-            Gradient::Nil => Ok(()),
+            None => Ok(()),
             _ => Err("ReLu does not accept a Gradient".to_string()),
         }
     }
     fn blank_gradient(&mut self) -> Gradient<DIM, DIM> {
-        Gradient::Nil
+        None
     }
 }
 
@@ -77,16 +77,16 @@ impl<const DIM: usize> SingleDimLayer<DIM, DIM> for SoftMax<DIM> {
     }
 
     fn internal_gradient(&self, _inp: [f64; DIM], _out_grad: &[f64; DIM]) -> Gradient<DIM, DIM> {
-        Gradient::Nil
+        None
     }
 
     fn apply_gradient(&mut self, grad: Gradient<DIM, DIM>) -> Result<(), String> {
         match grad {
-            Gradient::Nil => Ok(()),
+            Gradient::None => Ok(()),
             _ => Err("SoftMax does not accept a Gradient".to_string()),
         }
     }
     fn blank_gradient(&mut self) -> Gradient<DIM, DIM> {
-        Gradient::Nil
+        None
     }
 }
