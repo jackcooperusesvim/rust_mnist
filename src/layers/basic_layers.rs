@@ -1,4 +1,10 @@
+use crate::optimizers::Optimizer;
+
 use super::types::*;
+
+struct SimpleBias<const X: usize> {
+    bias: [f64; X],
+}
 
 pub struct LayerConnection<const IN: usize, const OUT: usize> {
     weights: [[f64; IN]; OUT],
@@ -43,8 +49,14 @@ impl<const IN: usize, const OUT: usize> SingleDimLayer<IN, OUT> for LayerConnect
             .unwrap()
     }
 
-    fn apply_gradient(&mut self, grad: Gradient<IN, OUT>) -> Result<(), String> {
-        todo!()
+    fn apply_gradient(&mut self, grad: Gradient<IN, OUT>, opt: &Optimizer) -> Result<(), String> {
+        let updates: [[f64; IN]; OUR] = opt.scale(grad).unwrap();
+        for col in 0..IN {
+            for row in 0..OUT {
+                self.weights[IN][OUT] = self.weights[IN][OUT] + updates[IN][OUT];
+            }
+        }
+        return Ok(());
     }
     fn blank_gradient(&mut self) -> Gradient<IN, OUT> {
         Some([[0.0; IN]; OUT])

@@ -1,6 +1,7 @@
 use super::types::*;
 
 pub struct ReLu<const DIM: usize> {}
+
 impl<const DIM: usize> SingleDimLayer<DIM, DIM> for ReLu<DIM> {
     fn new() -> ReLu<DIM> {
         ReLu {}

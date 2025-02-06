@@ -1,7 +1,9 @@
-use crate::layers::types::*;
+use crate::layers::types::{Gradient, WeightUpdates};
 
-pub trait Optimizer<const COL: usize, const ROW: usize> {
-    fn scale(&mut self, grad: Gradient<COL, ROW>) -> WeightUpdate<COL, ROW>;
+pub mod adam;
+pub mod gd;
+
+pub trait Optimizer<'a, const COL: usize, const ROW: usize, HP> {
+    fn scale(&mut self, grad: Gradient<COL, ROW>) -> WeightUpdates<COL, ROW>;
+    fn default(hyperparams: &'a HP) -> Self;
 }
-
-struct SGD {}
